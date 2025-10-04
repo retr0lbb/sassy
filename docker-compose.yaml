@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    container_name: sassy
+    restart: always
+    environment:
+      - POSTGRESQL_USERNAME=userretr0
+      - POSTGRESQL_PASSWORD=retr0123
+      - POSTGRESQL_DATABASE=sassy
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/bitnami/postgresql
+
+volumes:
+  postgres_data:
+    driver: local
