@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: bitnami/postgresql:latest
@@ -12,6 +14,44 @@ services:
     volumes:
       - postgres_data:/bitnami/postgresql
 
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: always
+    environment:
+      # base de dados que o n8n vai usar
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=sassy
+      - DB_POSTGRESDB_USER=userretr0
+      - DB_POSTGRESDB_PASSWORD=retr0123
+      # porta que o n8n vai rodar internamente
+      - N8N_PORT=5678
+    ports:
+      - "5678:5678"
+    depends_on:
+      - postgres
+
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: waha
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - WAHA_WORKER_ID=waha
+      - WAHA_PRINT_QR=False
+      # se quiser usar Postgres como storage de sessão (requer WAHA Plus)
+      - WHATSAPP_SESSIONS_POSTGRESQL_URL=postgres://admin:admin123@postgres:5432/app_db?sslmode=disable
+    depends_on:
+      - postgres
+    volumes:
+      # para persistir sessões localmente (caso não use Postgres para sessão)
+      - waha_sessions:/app/.sessions
+
 volumes:
   postgres_data:
+    driver: local
+  waha_sessions:
     driver: local
